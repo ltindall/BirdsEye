@@ -1,3 +1,4 @@
+import argparse
 import base64
 import configparser
 import json
@@ -98,7 +99,7 @@ class SigScan:
         )
 
         self.data["rssi"] = message_data.get("rssi", None)
-        self.data["position"] = message_data.get("position", None)
+        self.data["position"] = message_data.get("position", self.data["position"])
         self.data["course"] = get_heading(
             self.data["previous_position"], self.data["position"]
         )
@@ -256,7 +257,7 @@ class SigScan:
             "cuda" if torch.cuda.is_available() else "cpu"
         )  # pylint: disable=no-member
         results = birdseye.utils.Results(
-            method_name=planner_method,
+            experiment_name=planner_method,
             global_start_time=global_start_time,
             config=self.config,
         )
@@ -386,5 +387,9 @@ class SigScan:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    instance = SigScan()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config_path", type=str, default="sigscan_config.ini")
+    args = parser.parse_args()
+
+    instance = SigScan(config_path=args.config_path)
     instance.main()
